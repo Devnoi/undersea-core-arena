@@ -490,6 +490,7 @@ function start(){
   robots[1].autoTarget=items[routine==='hook'?0:3];
   robots[2].autoTarget=items[1];robots[3].autoTarget=items[5];
   $('mode').disabled=true;
+  $('match-fullscreen').hidden=false;
   state='play';$('ready').hidden=true;$('routine').disabled=true;$('pause').disabled=false;
   $('log').replaceChildren();log('Exploration started.');update();
 }

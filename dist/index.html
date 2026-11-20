@@ -1,17 +1,18 @@
 <!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Undersea Core Arena</title><meta name="description" content="Practice the 2026 League of Mecha-clash robotics match.">
-<link rel="stylesheet" href="arena.css?v=b642e8325e">
+<link rel="stylesheet" href="arena.css?v=b7c43f95e0">
 <header><div class="brand"><span class="logo">♆</span><div><strong>UNDERSEA CORE</strong><small>LEAGUE OF MECHA-CLASH</small></div></div><div class="header-actions"><button id="introduce" type="button">Introduce competition</button><button id="parts" type="button">Real equipment</button><button id="rules">Match rules</button></div></header>
 <main>
 <section class="intro"><div class="eyebrow">MARC 2026 / PRACTICE SIMULATOR</div><h1>Undersea Core Arena</h1><p>Collect energy cubes, secure the Ocean Core, and hang from Poseidon’s Trident.</p></section>
-<div class="layout"><section class="arena">
+<div class="layout" id="match-layout"><section class="arena">
 <div class="scoreboard"><div class="blue"><small>BLUE ALLIANCE</small><strong id="blue">000</strong></div><div class="clock"><small id="phase">MATCH READY</small><strong id="time">2:30</strong></div><div class="red"><small>RED ALLIANCE</small><strong id="red">000</strong></div></div>
 <div class="camera-bar" role="group" aria-label="Arena camera">
 <button type="button" data-camera="person" aria-pressed="false">First person</button>
 <button type="button" data-camera="top" aria-pressed="true">Top view</button>
 <button type="button" data-camera="orbit" aria-pressed="false">360° orbit</button>
 <button type="button" data-camera="3d" aria-pressed="false">3D overview</button>
+<button type="button" id="match-fullscreen" class="fullscreen-button" aria-pressed="false" hidden>Full screen</button>
 </div>
 <div class="camera-options" id="camera-options" hidden>
 <label for="follow" id="follow-label">Robot camera</label><select id="follow" hidden><option value="0">Blue 1</option><option value="1">Blue 2</option><option value="2">Red 1</option><option value="3">Red 2</option></select>
@@ -46,7 +47,11 @@
 <p class="reference-credit">Parts shown in Rule LOM, Figures 8, 11, 12, and 13, and the demo robot assembly guide, step 43.</p>
 </dialog>
 <dialog id="stage" aria-labelledby="stage-title">
+<div id="stage-shell">
+<div class="stage-actions">
+<button type="button" id="stage-fullscreen" class="fullscreen-button" aria-pressed="false">Full screen</button>
 <form method="dialog"><button aria-label="Close field introduction">Close</button></form>
+</div>
 <h2 id="stage-title">Competition field</h2>
 <p>Undersea Core Contest · 188 × 188 cm</p>
 <div class="stage-camera" role="group" aria-label="Competition introduction camera">
@@ -58,8 +63,13 @@
 <button id="stage-auto" type="button" aria-pressed="true">Auto-rotate</button>
 </div>
 </div>
+<div class="stage-content">
 <canvas id="stage-map" width="1120" height="756" aria-label="Map of the Undersea Core field without robots"></canvas>
+<div class="stage-area-guide">
 <div id="stage-areas" role="group" aria-label="Highlight a field area"></div>
 <p id="stage-description" aria-live="polite">Select an area to see where it is and what it does.</p>
+</div>
+</div>
+</div>
 </dialog>
-<script src="camera.js?v=ffec04e1b5"></script><script src="arena.js?v=b782d51da4"></script><script src="stage.js?v=3b24efc98e"></script></html>
+<script src="camera.js?v=ffec04e1b5"></script><script src="arena.js?v=8dca9b1e74"></script><script src="stage.js?v=3b24efc98e"></script><script src="fullscreen.js?v=f037b8cc88"></script></html>
