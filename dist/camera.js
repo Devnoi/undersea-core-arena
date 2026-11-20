@@ -18,7 +18,8 @@ function view(eye,target,focal){
   return {eye,forward,right,up,focal};
 }
 
-function scene(camera){
+function scene(camera,{context=ctx,fieldItems=items,showRobots=true}={}){
+  const ctx=context;
   const faces=[];
   function face(vertices,color,edge,decals){
     const points=vertices.map(vertex=>{
@@ -198,7 +199,7 @@ function scene(camera){
     face(corners,color,'#62717b',perforated(width,height));
   }
   const spectator=robots[Number(document.getElementById('follow').value)];
-  for(const r of robots){
+  for(const r of showRobots?robots:[]){
     if(r.out||(cameraMode==='person'&&r===spectator)) continue;
     const lift=r.hung?Math.min(1,(elapsed-r.hangStarted)/hangDuration):0;
     const z=41*lift;
@@ -248,11 +249,10 @@ function scene(camera){
       face([local(42,side*24,2),local(27,side*24,16),local(27,side*24,3)],'#85949e','#4f626c');
     part(41,0,2,3,49,2,teamPaint[r.team]);
   }
-  for(const o of items){
+  for(const [index,o] of fieldItems.entries()){
     const r=o.owner;
-    const {x,y,z}=itemPose(o);
+    const {x,y,z}=itemPose(o,index);
     const onTrident=o.hook!==undefined&&!o.removed;
-    const index=items.indexOf(o);
     if(o.core){
       for(const angle of [Math.PI/4,-Math.PI/4]){
         prism(x,y,z,33,3.5,16,angle,aluminum,perforated);
@@ -274,7 +274,8 @@ function scene(camera){
   }
   const sky=ctx.createLinearGradient(0,0,0,720);
   sky.addColorStop(0,'#182c3a');sky.addColorStop(1,'#07141d');
-  box(0,0,720,720,sky);
+  ctx.fillStyle=sky;
+  ctx.fillRect(0,0,720,720);
   const project=([x,y,z])=>[360+x/z*camera.focal,360-y/z*camera.focal];
   function paint(face){
     ctx.beginPath();

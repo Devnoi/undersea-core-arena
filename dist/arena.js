@@ -20,17 +20,20 @@ const distance = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
 const point = ([x,y]) => ({x,y});
 let robots, items, bank, elapsed, state, phase, allBots;
 
-function reset() {
-  robots = starts.flatMap((positions, team) => positions.map((pos, slot) => ({
-    ...point(pos), team, slot, angle: team ? Math.PI : 0, held:null, reset:false, protectedUntil:0
-  })));
+function createFieldItems(){
   const hookedCubes = [0,1].flatMap(team => hookOffsets.map((offset, length) => {
     const delta = team ? offset : -offset;
     return [tridentCenter+delta,tridentCenter-delta,team,length===1];
   }));
-  items = [[250,470],[470,250],...hookedCubes,[136,121],[123,139],[584,599],[597,581],
+  return [[250,470],[470,250],...hookedCubes,[136,121],[123,139],[584,599],[597,581],
     [tridentCenter,tridentCenter,2]]
     .map(([x,y,hook,longHook]) => ({x,y,hook,longHook,core:hook===2,removed:false,base:null,owner:null}));
+}
+function reset() {
+  robots = starts.flatMap((positions, team) => positions.map((pos, slot) => ({
+    ...point(pos), team, slot, angle: team ? Math.PI : 0, held:null, reset:false, protectedUntil:0
+  })));
+  items=createFieldItems();
   elapsed=0; state='ready'; phase=0; bank=[0,0]; keys.clear();
   $('log').innerHTML='<li>Waiting for kickoff.</li>';
   $('ready').hidden=false; $('mode').disabled=false; syncMode(); $('pause').disabled=true;
@@ -78,10 +81,9 @@ function update() {
     : phase===2?'Hang at the blue side of the Trident or keep scoring.':'Collect objects or push opponents off the mat.';
   drawCamera();
 }
-function restingHeight(o) {
+function restingHeight(o,index=items.indexOf(o)) {
   if (o.hook!==undefined && !o.removed)
     return o.core?beamHeight+12:beamHeight-(o.longHook?38:31);
-  const index=items.indexOf(o);
   return o.base===null && index>=6 && index<=9 &&
     (Math.hypot(o.x-130,o.y-130)<28 || Math.hypot(o.x-590,o.y-590)<28)?(index%2?20:40):0;
 }
@@ -131,9 +133,9 @@ function advancePickup(r) {
   if(time>=pickupDuration) r.pickup=null;
 }
 function name(r){return (r.team?'Red ':'Blue ')+(r.slot+1);}
-function itemPose(o) {
+function itemPose(o,index) {
   if(o.owner) return cargoPose(o.owner);
-  if(!o.drop) return {x:o.x,y:o.y,z:restingHeight(o)};
+  if(!o.drop) return {x:o.x,y:o.y,z:restingHeight(o,index)};
   const {z,started}=o.drop;
   const t=Math.min(1,(elapsed-started)/dropDuration);
   return {x:o.x,y:o.y,z:z*(1-t*t)};
@@ -447,18 +449,15 @@ arenaMap.width=arenaMap.height=720;
 drawStaticField();
 arenaMap.getContext('2d').drawImage($('field'),0,0);
 
-function draw(){
-  ctx.drawImage(arenaMap,0,0);
-  for(const r of robots) drawRobot(r);
-  for(const o of items){
-    const {x,y}=itemPose(o);
+function drawItems(fieldItems){
+  for(const [i,o] of fieldItems.entries()){
+    const {x,y}=itemPose(o,i);
     const size=o.core?30:19;
     ctx.save();ctx.translate(x,y);
     if(o.core){
       rail(-9,-11,33,Math.PI/4,5,'#9aaec8');
       rail(-12,10,33,-Math.PI/4,5,'#526fa6');
     } else {
-      const i=items.indexOf(o);
       const team=o.hook??(i<2?i:null);
       box(-size/2+3,-size/2+4,size,size,'#13171b99');
       box(-size/2,-size/2,size,size,'#335b9b','#213650');
@@ -473,6 +472,17 @@ function draw(){
     ctx.restore();
   }
 }
+function draw(){
+  ctx.drawImage(arenaMap,0,0);
+  for(const r of robots) drawRobot(r);
+  drawItems(items);
+}
+const stageItems=createFieldItems();
+const stageTopMap=document.createElement('canvas');
+stageTopMap.width=stageTopMap.height=720;
+drawItems(stageItems);
+stageTopMap.getContext('2d').drawImage($('field'),0,0);
+
 function start(){
   syncMode();
   const routine=allBots?'floor':$('routine').value;
@@ -531,7 +541,7 @@ function frame(now){
     for(let step=0;step<steps&&state==='play';step++) tick(dt*speed/steps);
     update();
   }
-  if(state!=='play'&&cameraMode==='orbit'&&autoOrbit) drawCamera();
+  if(state!=='play'&&cameraMode==='orbit'&&autoOrbit&&!$('stage').open) drawCamera();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

@@ -2,9 +2,19 @@ const stage = $('stage');
 const stageMap = $('stage-map');
 const stageCtx = stageMap.getContext('2d');
 const compactStage = window.matchMedia('(max-width: 540px)');
+const stageOrbitBuffer=document.createElement('canvas');
+stageOrbitBuffer.width=stageOrbitBuffer.height=720;
+const stageOrbitCtx=stageOrbitBuffer.getContext('2d');
+let stageMode='orbit';
+let stageAngle=Math.PI*.32;
+let stageLift=840;
+let stageAuto=true;
+let stageDrag=null;
+let lastStageFrame=0;
+let stageFrameId=0;
 const stageAreas = [
   {name:'Object Return Zones', side:0, y:73, points:[[65,66],[654,654]], detail:'Referees return loose scoring objects that leave the mat to the nearest return-zone boundary.'},
-  {name:'Ancient Ruin Pillars', side:0, y:169, points:[[130,130],[590,590]], detail:'Two Energy Cubes start on each of the two-tiered pillars.'},
+  {name:'Ancient Ruin Pillars', side:0, y:169, z:37, points:[[130,130],[590,590]], detail:'Two Energy Cubes start on each of the two-tiered pillars.'},
   {name:'White Center Line', side:0, y:267, points:[[228,228]], detail:'The diagonal between the two return zones. Robots must keep clear of it during Exploration.'},
   {name:'Blue Starting Zones', side:0, y:423, points:starts[0], color:colors[0], detail:'Blue robots start fully within these two taped squares.'},
   {name:'Blue Hanging Forbidden Zone', side:0, y:513, points:[mounts[0]], color:colors[0], detail:'During Occupation, opponents must avoid contact with a Blue robot touching this marked zone.'},
@@ -12,7 +22,7 @@ const stageAreas = [
   {name:'Red Alliance Base', side:1, y:73, points:[bases[1]], color:colors[1], detail:'Red scores by releasing Energy Cubes and the Ocean Core onto the floor inside this base.'},
   {name:'Red Starting Zones', side:1, y:168, defaultPoint:1, points:starts[1], color:colors[1], detail:'Red robots start fully within these two taped squares.'},
   {name:'Red Hanging Forbidden Zone', side:1, y:284, points:[mounts[1]], color:colors[1], detail:'During Occupation, opponents must avoid contact with a Red robot touching this marked zone.'},
-  {name:'Poseidon’s Trident', side:1, y:388, points:[[tridentCenter,tridentCenter]], detail:'The Ocean Core starts on top, and hooked Energy Cubes hang under the long beam. Each alliance hangs its robots on its colored crossbar.'},
+  {name:'Poseidon’s Trident', side:1, y:388, z:beamHeight, points:[[tridentCenter,tridentCenter]], detail:'The Ocean Core starts on top, and hooked Energy Cubes hang under the long beam. Each alliance hangs its robots on its colored crossbar.'},
   {name:'Tracking Lines', side:1, y:484, points:[[534,184],[189,535]], detail:'White cross-shaped tape guides autonomous runs from the starting zones toward each base.'}
 ];
 let activeArea=null;
@@ -21,12 +31,28 @@ function paintStage(){
   const compact=compactStage.matches;
   const width=compact?720:1120;
   const offset=compact?0:200;
-  stageMap.width=width;
-  stageMap.height=compact?720:756;
+  if(stageMap.width!==width) stageMap.width=width;
+  const height=compact?720:756;
+  if(stageMap.height!==height) stageMap.height=height;
   stageCtx.fillStyle='#0a1620';
   stageCtx.fillRect(0,0,width,stageMap.height);
   const top=compact?0:18;
-  stageCtx.drawImage(arenaMap,offset,top);
+  let camera;
+  if(stageMode==='orbit'){
+    camera=view([
+      tridentCenter+Math.cos(stageAngle)*1160,
+      tridentCenter+Math.sin(stageAngle)*1160,
+      stageLift
+    ],[tridentCenter,tridentCenter,30],980);
+    scene(camera,{context:stageOrbitCtx,fieldItems:stageItems,showRobots:false});
+    stageCtx.drawImage(stageOrbitBuffer,offset,top);
+  } else stageCtx.drawImage(stageTopMap,offset,top);
+  const anchor=(point,height)=>{
+    if(!camera) return [point[0]+offset,point[1]+top];
+    const relative=sub([...point,height],camera.eye);
+    const scale=camera.focal/dot(relative,camera.forward);
+    return [360+offset+dot(relative,camera.right)*scale,360+top-dot(relative,camera.up)*scale];
+  };
   const displayed=activeArea?[activeArea]:compact?[stageAreas[9]]:stageAreas;
   for(const area of displayed){
     const accent=area.color||'#baf4ed';
@@ -34,12 +60,12 @@ function paintStage(){
     const right=area.side===1;
     const x=compact?(right?420:14):(right?925:6);
     const boxWidth=compact?286:189;
-    const y=compact?Math.max(36,Math.min(682,points[0][1]+60)):area.y;
+    const anchors=points.map(point=>anchor(point,area.z??0));
+    const y=compact?Math.max(36,Math.min(682,anchors[0][1]+60)):area.y;
     const edge=right?x:x+boxWidth;
     stageCtx.strokeStyle=accent;
     stageCtx.lineWidth=activeArea?3:1.5;
-    for(const [px,py] of points){
-      const ax=px+offset,ay=py+top;
+    for(const [ax,ay] of anchors){
       stageCtx.beginPath();
       stageCtx.moveTo(compact?x+boxWidth/2:edge,y);
       if(!compact) stageCtx.lineTo(edge+(right?-19:19),y);
@@ -80,9 +106,67 @@ for(const area of stageAreas){
   };
   $('stage-areas').append(button);
 }
+function stopStageOrbit(){
+  if(stageFrameId) cancelAnimationFrame(stageFrameId);
+  stageFrameId=0;
+  lastStageFrame=0;
+}
+function animateStage(now){
+  if(!stage.open||stageMode!=='orbit'||!stageAuto){
+    stopStageOrbit();
+    return;
+  }
+  if(lastStageFrame) stageAngle+=Math.min(now-lastStageFrame,50)*.00031;
+  lastStageFrame=now;
+  paintStage();
+  stageFrameId=requestAnimationFrame(animateStage);
+}
+function refreshStage(){
+  stopStageOrbit();
+  paintStage();
+  if(stage.open&&stageMode==='orbit'&&stageAuto)
+    stageFrameId=requestAnimationFrame(animateStage);
+}
+function selectStageCamera(mode){
+  stageMode=mode;
+  const orbit=mode==='orbit';
+  $('stage-orbit').setAttribute('aria-pressed',String(orbit));
+  $('stage-top').setAttribute('aria-pressed',String(!orbit));
+  $('stage-orbit-controls').hidden=!orbit;
+  stageMap.classList.toggle('orbit',orbit);
+  stageMap.setAttribute('aria-label',orbit?
+    '3D orbit of the Undersea Core field with named areas and no robots':
+    'Top-down map of the Undersea Core field with named areas and no robots');
+  refreshStage();
+}
+function setStageAuto(enabled){
+  stageAuto=enabled;
+  $('stage-auto').setAttribute('aria-pressed',String(enabled));
+  refreshStage();
+}
+$('stage-orbit').onclick=()=>selectStageCamera('orbit');
+$('stage-top').onclick=()=>selectStageCamera('top');
+$('stage-auto').onclick=()=>setStageAuto(!stageAuto);
+$('stage-left').onclick=()=>{stageAngle-=Math.PI/8;setStageAuto(false);};
+$('stage-right').onclick=()=>{stageAngle+=Math.PI/8;setStageAuto(false);};
+stageMap.onpointerdown=e=>{
+  if(stageMode!=='orbit') return;
+  stageDrag=[e.clientX,e.clientY];
+  stageMap.setPointerCapture(e.pointerId);
+  setStageAuto(false);
+};
+stageMap.onpointermove=e=>{
+  if(!stageDrag) return;
+  stageAngle-=(e.clientX-stageDrag[0])*.012;
+  stageLift=Math.max(490,Math.min(1250,stageLift+(e.clientY-stageDrag[1])*4));
+  stageDrag=[e.clientX,e.clientY];
+  paintStage();
+};
+stageMap.onlostpointercapture=()=>{stageDrag=null;};
 $('introduce').onclick=()=>{
   if(state==='play') $('pause').click();
-  paintStage();
   stage.showModal();
+  selectStageCamera(stageMode);
 };
+stage.addEventListener('close',stopStageOrbit);
 compactStage.addEventListener('change',()=>{if(stage.open) paintStage();});

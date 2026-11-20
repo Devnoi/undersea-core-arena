@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Undersea Core Arena</title><meta name="description" content="Practice the 2026 League of Mecha-clash robotics match.">
-<link rel="stylesheet" href="arena.css">
+<link rel="stylesheet" href="arena.css?v=b642e8325e">
 <header><div class="brand"><span class="logo">♆</span><div><strong>UNDERSEA CORE</strong><small>LEAGUE OF MECHA-CLASH</small></div></div><div class="header-actions"><button id="introduce" type="button">Introduce competition</button><button id="parts" type="button">Real equipment</button><button id="rules">Match rules</button></div></header>
 <main>
 <section class="intro"><div class="eyebrow">MARC 2026 / PRACTICE SIMULATOR</div><h1>Undersea Core Arena</h1><p>Collect energy cubes, secure the Ocean Core, and hang from Poseidon’s Trident.</p></section>
@@ -49,8 +49,17 @@
 <form method="dialog"><button aria-label="Close field introduction">Close</button></form>
 <h2 id="stage-title">Competition field</h2>
 <p>Undersea Core Contest · 188 × 188 cm</p>
+<div class="stage-camera" role="group" aria-label="Competition introduction camera">
+<button id="stage-orbit" type="button" aria-pressed="true">360° orbit</button>
+<button id="stage-top" type="button" aria-pressed="false">Top view</button>
+<div id="stage-orbit-controls">
+<button id="stage-left" type="button" aria-label="Rotate field left">Rotate left</button>
+<button id="stage-right" type="button" aria-label="Rotate field right">Rotate right</button>
+<button id="stage-auto" type="button" aria-pressed="true">Auto-rotate</button>
+</div>
+</div>
 <canvas id="stage-map" width="1120" height="756" aria-label="Map of the Undersea Core field without robots"></canvas>
 <div id="stage-areas" role="group" aria-label="Highlight a field area"></div>
 <p id="stage-description" aria-live="polite">Select an area to see where it is and what it does.</p>
 </dialog>
-<script src="camera.js"></script><script src="arena.js"></script><script src="stage.js"></script></html>
+<script src="camera.js?v=ffec04e1b5"></script><script src="arena.js?v=b782d51da4"></script><script src="stage.js?v=3b24efc98e"></script></html>
