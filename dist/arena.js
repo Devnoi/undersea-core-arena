@@ -402,7 +402,7 @@ function drawRobot(r){
   ctx.restore();
   label(r.hung?'HANG':(r.team?'R':'B')+(r.slot+1),r.x,r.y+37,'#fff',13);
 }
-function draw(){
+function drawStaticField(){
   ctx.drawImage(mat,0,0);
   const tape='#f1f0e7';
   line(132,132,588,588,tape,6);
@@ -441,6 +441,14 @@ function draw(){
     rail(x-44,y-44,122,Math.PI/4,12,railPaint[t]);
   }
   box(348,348,24,24,'#a8b1b7','#dee5e8');
+}
+const arenaMap=document.createElement('canvas');
+arenaMap.width=arenaMap.height=720;
+drawStaticField();
+arenaMap.getContext('2d').drawImage($('field'),0,0);
+
+function draw(){
+  ctx.drawImage(arenaMap,0,0);
   for(const r of robots) drawRobot(r);
   for(const o of items){
     const {x,y}=itemPose(o);
