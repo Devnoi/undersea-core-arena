@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Undersea Core Arena</title><meta name="description" content="Practice the 2026 League of Mecha-clash robotics match.">
+<link rel="stylesheet" href="arena.css">
+<header><div class="brand"><span class="logo">♆</span><div><strong>UNDERSEA CORE</strong><small>LEAGUE OF MECHA-CLASH</small></div></div><div class="header-actions"><button id="parts" type="button">Real equipment</button><button id="rules">Match rules</button></div></header>
+<main>
+<section class="intro"><div class="eyebrow">MARC 2026 / PRACTICE SIMULATOR</div><h1>Undersea Core Arena</h1><p>Collect energy cubes, secure the Ocean Core, and hang from Poseidon’s Trident.</p></section>
+<div class="layout"><section class="arena">
+<div class="scoreboard"><div class="blue"><small>BLUE ALLIANCE</small><strong id="blue">000</strong></div><div class="clock"><small id="phase">MATCH READY</small><strong id="time">2:30</strong></div><div class="red"><small>RED ALLIANCE</small><strong id="red">000</strong></div></div>
+<div class="camera-bar" role="group" aria-label="Arena camera">
+<button type="button" data-camera="person" aria-pressed="false">First person</button>
+<button type="button" data-camera="top" aria-pressed="true">Top view</button>
+<button type="button" data-camera="orbit" aria-pressed="false">360° orbit</button>
+<button type="button" data-camera="3d" aria-pressed="false">3D overview</button>
+</div>
+<div class="camera-options" id="camera-options" hidden>
+<label for="follow" id="follow-label">Robot camera</label><select id="follow" hidden><option value="0">Blue 1</option><option value="1">Blue 2</option><option value="2">Red 1</option><option value="3">Red 2</option></select>
+<div id="orbit-controls" hidden><button id="rotate-left" type="button" aria-label="Rotate camera left">Rotate left</button><button id="rotate-right" type="button" aria-label="Rotate camera right">Rotate right</button><button id="auto-orbit" type="button" aria-pressed="true">Auto-rotate</button></div>
+<span id="camera-status" role="status"></span>
+</div>
+<div class="field"><canvas id="field" width="720" height="720" aria-label="Top-down competition arena"></canvas><div id="ready"><span>♆</span><b>Ready to dive?</b><p>Watch four bots play, or drive Blue 1.</p><button class="primary" id="start">Start match</button></div></div>
+<div class="legend"><span><i></i> Energy cube</span><span><i></i> Ocean Core</span><span><i></i> Trident</span><span>FIELD · 188 × 188 CM</span></div>
+</section>
+<aside><section class="panel"><h2>Match phases</h2><div id="phases">
+<div><i></i><span><b>Exploration</b><small>Autonomous routine</small></span><time>0:30</time></div>
+<div><i></i><span><b>Scramble</b><small>Driver control</small></span><time>1:30</time></div>
+<div><i></i><span><b>Occupation</b><small>Protected hanging zones</small></span><time>0:30</time></div></div>
+<label for="mode">Match mode</label><select id="mode"><option value="bots">Watch four bots</option><option value="drive">Drive Blue 1</option></select><label for="speed">Playback speed</label><select id="speed"><option value="1" selected>1× real time</option><option value="0.5">½× slow motion</option><option value="2">2× speed</option><option value="4">4× speed</option></select><label for="routine">Blue 1 autonomous routine</label><select id="routine"><option value="floor">Deliver floor cube</option><option value="hook">Deliver Trident cube</option><option value="idle">Stay in starting zone</option></select></section>
+<section class="panel" id="controls"><h2>Robot controls</h2><div class="control"><span>Drive</span><span><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></span></div><div class="control"><span>Grab / release</span><button data-key=" ">Space</button></div><div class="control"><span>Hang</span><button data-key="h">H</button></div><div class="control"><span>Use Reset Card</span><button data-key="r">R</button></div><div class="touch"><button data-key="w">↑</button><button data-key="a">←</button><button data-key="s">↓</button><button data-key="d">→</button></div></section><p id="hint" role="status">Four bots are ready.</p>
+<section class="panel events"><h2>Match log</h2><ol id="log"><li>Waiting for kickoff.</li></ol></section>
+<div class="actions"><button id="pause" disabled>Pause</button><button id="restart">Restart</button></div></aside></div>
+<footer>Based on the January 8, 2026 V2 rulebook. Local event rules may vary.</footer>
+</main>
+<dialog id="guide"><form method="dialog"><button aria-label="Close rules">Close</button></form><h2>Match rules</h2><p>Drive with WASD or the arrow keys. Use Space near an object to pick it up. Drive inside Blue Base and release to score. You can carry one object at a time.</p><ul><li>Exploration banks 100 per cube removed from the Trident and 200 per cube left in base at the phase boundary.</li><li>At the finish, cubes in base earn 100 each and the Ocean Core earns 300.</li><li>The short- and long-hook cubes hang beneath the long central beam. Hang your robot on your alliance’s colored crossbar with H. Wait until Occupation or until all Trident objects are removed. Each hang earns 700 and a double hang adds 300.</li><li>A fall earns the other alliance 50. A Reset Card gives the other alliance another 50 and can only be used during Scramble.</li></ul><p>All-bot mode runs both alliances through the entire match. The model uses approximate robot geometry, collisions, pickup and hanging. The score shows banked points plus projected finish points during play.</p></dialog>
+<dialog id="equipment" aria-labelledby="equipment-title">
+<form method="dialog"><button aria-label="Close equipment">Close</button></form>
+<h2 id="equipment-title">Real competition equipment</h2>
+<div class="equipment-grid">
+<figure><img src="reference/energy-cubes.jpg" alt="Silver perforated Energy Cubes with blue corner hardware and circular alliance markers" loading="lazy"><figcaption><strong>Energy cubes</strong><small>48 mm metal bodies with neutral, blue, or red faces.</small></figcaption></figure>
+<figure><img src="reference/hook-cubes.jpg" alt="Red and blue cubes fitted with short and long metal hanging hooks" loading="lazy"><figcaption><strong>Hooked Energy Cubes</strong><small>Short hooks at left and long hooks at right.</small></figcaption></figure>
+<figure><img src="reference/ocean-core.jpg" alt="Ocean Core made from silver perforated plates and blue brackets arranged in an X" loading="lazy"><figcaption><strong>Ocean Core</strong><small>Crossed plates and blue brackets. 87 × 87 × 42 mm.</small></figcaption></figure>
+<figure><img src="reference/demo-robot.jpg" alt="MATRIX demo robot with blue wheel hubs, a white controller, a sloped scoop, and a tall twin-rail arm" loading="lazy"><figcaption><strong>MA321 + MX120 demo robot</strong><small>Assembly illustration. Two drive wheels, a front scoop, and a twin-rail lift.</small></figcaption></figure>
+<figure><img src="reference/alliance-base.jpg" alt="Alloy L-shaped rails on silver legs with bright blue and red side panels" loading="lazy"><figcaption><strong>Alliance bases</strong><small>Perforated aluminum rails and legs with colored MARC panels.</small></figcaption></figure>
+<figure><img src="reference/trident.jpg" alt="Silver double-rail Trident with black center-beam faceplates and blue and red robot hanging bars" loading="lazy"><figcaption><strong>Poseidon’s Trident</strong><small>Silver support frame, a black-faced cube beam, and colored hanging bars.</small></figcaption></figure>
+</div>
+<p class="reference-credit">Parts shown in Rule LOM, Figures 8, 11, 12, and 13, and the demo robot assembly guide, step 43.</p>
+</dialog>
+<script src="camera.js"></script><script src="arena.js"></script></html>
